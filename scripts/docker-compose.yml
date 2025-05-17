@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: uverify
+      POSTGRES_PASSWORD: your_uverify_db_password
+      POSTGRES_DB: uverify
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  uverify-backend:
+    image: uverify/uverify-backend:latest
+    container_name: uverify-backend
+    restart: always
+    environment:
+      PORT: 9090
+      SPRING_ACTIVE_PROFILES: postgres,mainnet
+      DB_URL: jdbc:postgresql://postgres:5432/uverify
+      DB_USERNAME: uverify
+      DB_PASSWORD: your_uverify_db_password
+      REMOTE_NODE_URL: backbone.cardano.iog.io # Change this to your preferred remote node URL (backbone.preprod.cardanofoundation.org)
+      REMOTE_NODE_PORT: 3001
+      PROTOCOL_MAGIC: 764824073
+      CARDANO_NETWORK: MAINNET
+      BLOCKFROST_PROJECT_ID: # Add your Blockfrost project ID here
+      BLOCKFROST_BASE_URL: https://cardano-mainnet.blockfrost.io/api/v0/ # Add your Blockfrost base URL here
+      CORS_ALLOWED_ORIGINS: "*"
+
+      CONNECTED_GOODS_ENCRYPTION_SALT: # Add your encryption salt here
+      CONNECTED_GOODS_EXTENSION_ENABLED: false
+      CONNECTED_GOODS_SERVICE_WALLET_ADDRESS: # Add your service wallet address here
+
+      TADAMON_EXTENSION_ENABLED: false
+      TADAMON_ALLOWED_ADDRESSES: # Add your allowed addresses here if TADAMON_EXTENSION_ENABLED is true
+      TADAMON_GOOGLE_SHEETS_PRIVATE_KEY: # "-----BEGIN PRIVATE KEY-----\n...=\n-----END PRIVATE KEY-----\n"
+      TADAMON_GOOGLE_SHEETS_SERVICE_ACCOUNT: # Add your Google Sheets service account email here
+      TADAMON_GOOGLE_SHEETS_ID: # Add your Google Sheets ID here
+      
+      SERVICE_USER_ADDRESS: addr1qxqup4lcghajeawjx3faccuewk2k3ztneps8segrcn28ky223ul5q54jq72wps946c5gw8z5mfjhqa9r8znzk4vd4sls8jqsva
+      # For testnets, use the following address:
+      # SERVICE_USER_MNEMONIC: addr_test1qqgmew8y57fsfc3me40zha3gjplehxv0gwgz7sw3mdpenqgs8flgvgd7y0mwwkk5p96a8hfdptxrawepr2evqhl2aj3sr9vgye
+      
+      # FACILITATOR_ACCOUNT_MNEMONIC: Add your *optional* facilitator mnemonic here
+      # The facilitator is used to sign rest requests, ensuring that the request is coming from a trusted source.
+      # This account is not used for any other purpose and will be grenerated by the backend if not provided.
+    depends_on:
+      - postgres
+    ports:
+      - "9090:9090"
+
+  uverify-ui:
+    image: uverify/uverify-ui:latest
+    container_name: uverify-ui
+    restart: always
+    environment:
+      VITE_BACKEND_URL: http://uverify-backend:9090
+      VITE_CARDANO_NETWORK: mainnet
+    depends_on:
+      - uverify-backend
+    ports:
+      - "3000:80"
+
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: nginx
+  #   restart: always
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #     - ./certs:/etc/letsencrypt
+  #   ports:
+  #     - "443:443"
+  #   depends_on:
+  #     - uverify-ui
+
+volumes:
+  postgres_data:
