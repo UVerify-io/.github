@@ -2,15 +2,23 @@
 
 UVerify opens up blockchain technology to everyone, no matter your background. Effortlessly secure your file or text hashes on the Cardano blockchain. Want to kick the tires before diving into the code? Head over to [app.uverify.io](app.uverify.io) to check out the app.
 
+## ✨ Features
+
+With UVerify, you can easily store and retrieve data on the Cardano blockchain. The API is straightforward, and the UI is both intuitive and highly customizable. You can deploy your own instance or use the hosted version — whatever fits your needs best. Our main goal is flexibility: UVerify is designed to be a tool anyone can integrate seamlessly into their own projects. It’s more than just a tool; it’s a platform.
+
+### How does it work?
+
+UVerify includes its own scoped chain indexer, a Web3 API key management system, on-chain metadata support, and extension points for both the backend and frontend. The frontend is built with React, while the backend is a Java Spring Boot application that leverages [Yaci Store](https://github.com/bloxbean/yaci-store).
+
 ## 🚀 Getting Started
 
-It's all about verification, so why not run your own UVerify instance? Just grab this [docker-compose file](../scripts/docker-compose.yml) and fire off these commands:
+It's all about verification, so why not run your own UVerify instance? Just grab this [docker-compose file](../scripts/docker-compose.yml) and fire off this command:
 
 ```zsh
-docker-compose up
+docker compose up
 ```
 
-### 🍓 Quick Wins
+### 🍓 Low Hanging Fruits
 
 UVerify lets you build use cases in a snap. For most things, it feels more like calling an API than wrestling with a full-blown blockchain solution. Here are a few examples of what you can do with UVerify:
 
