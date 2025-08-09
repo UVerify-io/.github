@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  playwright-check:
+  app-uverify-io-liveness-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
