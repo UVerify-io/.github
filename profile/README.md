@@ -35,16 +35,29 @@ docker compose up
 UVerify lets you build use cases in a snap. For most things, it feels more like calling an API than wrestling with a full-blown blockchain solution. Here are a few examples of what you can do with UVerify:
 
 - **Notary Service:** Store file or text hashes on the Cardano blockchain.
-```js
-// UVerify plays nicely with any Cardano off-chain library. This example uses [meshjs.dev](https://meshjs.dev/apis/wallets)
 
-// npm install @meshsdk/core
+Install the required dependencies:
+```bash
+npm install @meshsdk/core js-sha256 axios
+```
+
+**Node.js (server-side) example:**
+```js
+// UVerify plays nicely with any Cardano off-chain library.
+// This example uses meshjs.dev
 
 import { MeshWallet, KoiosProvider } from '@meshsdk/core';
+import { sha256 } from 'js-sha256';
+import axios from 'axios';
 
+const BACKEND_URL = 'https://api.uverify.io'; // or 'http://localhost:9090' for local dev
+
+// Generate a new wallet and store your mnemonic somewhere safe!
+// If you lose it, you lose access to any funds held by this wallet.
 const mnemonic = MeshWallet.brew();
-const koiosProvider = new KoiosProvider('api');
+console.log('Save your mnemonic:', mnemonic);
 
+const koiosProvider = new KoiosProvider('api');
 const wallet = new MeshWallet({
     networkId: 1, // 0: testnet, 1: mainnet
     fetcher: koiosProvider,
@@ -57,59 +70,100 @@ const wallet = new MeshWallet({
 
 const userAddress = await wallet.getChangeAddress();
 
-// backendUrl is for example api.uverify.io or localhost:9090
+// Hash the data you want to certify. This could be a string, file contents, etc.
+const myData = 'Hello, UVerify!'; // replace with your content
+const hash = sha256(myData);
 
-const response = await axios.post(
-backendUrl + '/api/v1/transaction/build',
-{
+// Optionally attach public metadata to the certificate
+const metadata = {
+    issuer: 'Acme Corp',
+    description: 'Proof of existence for myData',
+    date: new Date().toISOString(),
+};
+
+// Step 1: Build the unsigned transaction
+// Make sure your wallet has funds before submitting a transaction.
+// If you're on testnet, you can get free test ADA from the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnets/tools/faucet/).
+// If you're on mainnet, you'll need real ADA in your wallet. Your request will fail if the wallet balance is too low to cover the transaction fee.
+
+const buildResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/build`, {
     type: 'DEFAULT',
     address: userAddress,
     certificates: [
-    {
-        hash: hash,
-        metadata: metadata,
-        algorithm: 'SHA-256',
-    },
-    ],
-}
-);
-
-if (response.status === 200 && response.data.status?.code === 'SUCCESS') {
-    const tx = response.data.unsigned_transaction;
-    const signedTx = await wallet.signTx(tx, true);
-    const result = await axios.post(
-        backendUrl + '/api/v1/transaction/submit',
         {
-            transaction: signedTx
-        }
-    );
+            hash,
+            metadata,
+            algorithm: 'SHA-256',
+        },
+    ],
+});
 
-    if (result.status === 200 && result.data.successful) {
-        console.log('Transaction submitted successfully with txHash:', result.data.value);
-    }
+if (buildResponse.status !== 200 || buildResponse.data.status?.code !== 'SUCCESS') {
+    throw new Error('Failed to build transaction: ' + JSON.stringify(buildResponse.data));
+}
 
-    /*
-        You can also use a CIP30 browser api to sign the transaction. In this case, signTx would return a witnessSet instead of a signed transaction. You can then just submit the unsigned transaction and the witnessSet to the backend.
+// Step 2: Sign the transaction
+const unsignedTx = buildResponse.data.unsigned_transaction;
+const signedTx = await wallet.signTx(unsignedTx, true);
 
-        const api = await (window as any).cardano[enabledWallet].enable();
-        const witnessSet = await api.signTx(tx, true);
+// Step 3: Submit the signed transaction
+const submitResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/submit`, {
+    transaction: signedTx,
+});
 
-        const result = await axios.post(
-          backendUrl + '/api/v1/transaction/submit',
-          {
-            transaction: tx,
-            witnessSet: witnessSet,
-          }
-        );
-    */
+if (submitResponse.status === 200 && submitResponse.data.successful) {
+    console.log('Transaction submitted! TxHash:', submitResponse.data.value);
+} else {
+    throw new Error('Failed to submit transaction: ' + JSON.stringify(submitResponse.data));
 }
 ```
 
-- **Custom UI Templates:** Make it your own with a tailored look and feel.
+**Browser (CIP-30 wallet) example:**
 
-Use the `uverify_template_id` field to tweak the certificate's appearance. You can also chip in by adding new templates, or keep templates exclusive to your users by implementing the [abstract template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Template.tsx)
+If you're building a frontend and want users to sign with their own wallet (e.g. Eternl, Yoroi), use the CIP-30 API instead:
+```js
+const api = await window.cardano[enabledWallet].enable();
+const userAddress = (await api.getUsedAddresses())[0];
 
-Here's a basic example for [student certificates](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Diploma.tsx). For something more involved, check out the [social hub ui template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/SocialHub/SocialHubTemplate.tsx).
+// Build the transaction the same way as above...
+const buildResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/build`, {
+    type: 'DEFAULT',
+    address: userAddress,
+    certificates: [{ hash, metadata, algorithm: 'SHA-256' }],
+});
+
+const unsignedTx = buildResponse.data.unsigned_transaction;
+
+// The user signs via their browser wallet — returns a witness set, not a full signed tx
+const witnessSet = await api.signTx(unsignedTx, true);
+
+const submitResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/submit`, {
+    transaction: unsignedTx,
+    witnessSet,
+});
+
+if (submitResponse.status === 200 && submitResponse.data.successful) {
+    console.log('Transaction submitted! TxHash:', submitResponse.data.value);
+}
+```
+
+### **Custom UI Templates:** Make it your own with a tailored look and feel.
+
+  Pass `uverify_template_id` in your certificate's metadata to control how it renders in the UI:
+```js
+  const metadata = {
+      uverify_template_id: 'diploma',
+      issuer: 'Acme University',
+      recipient: 'Jane Doe',
+  };
+```
+
+  There are two ways to work with templates:
+
+  - **Use or contribute a community template**: Browse existing templates or add your own by implementing the [abstract template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Template.tsx). Contributions are welcome.
+  - **Keep a template private**: If you're building a product on top of UVerify, you can implement the same abstract template in your own fork or deployment, keeping your branding exclusive to your users.
+
+  To get a feel for what's possible, the [Diploma template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Diploma.tsx) is a clean starting point showing a simple single-purpose certificate layout. The [Social Hub template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/SocialHub/SocialHubTemplate.tsx) goes further, demonstrating how to build a richer, multi-component layout when your certificate needs to display more complex data.
 
 ### 🔎 Dig Deeper
 
