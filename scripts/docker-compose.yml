@@ -47,6 +47,15 @@ services:
       # FACILITATOR_ACCOUNT_MNEMONIC: Add your *optional* facilitator mnemonic here
       # The facilitator is used to sign rest requests, ensuring that the request is coming from a trusted source.
       # This account is not used for any other purpose and will be grenerated by the backend if not provided.
+
+      # Since UVerify version 2, UVerify is using upgradable contracts
+      # Please make sure to use this proxy settings on mainnet
+      PROXY_TX_HASH=e87045afe5247ef3912b37be23ba7b0df193849f463ad4ddd89216c512613af2
+      PROXY_OUTPUT_INDEX=1
+
+      # Or these settings for preprod
+      # PROXY_TX_HASH=ab9ef12a53209db854dddd415d6404cb8323bf9d05bfb174334de150275d4986
+      # PROXY_OUTPUT_INDEX=1
     depends_on:
       - postgres
     ports:
@@ -59,6 +68,7 @@ services:
     environment:
       VITE_BACKEND_URL: http://uverify-backend:9090
       VITE_CARDANO_NETWORK: mainnet
+      VITE_ADDITIONAL_TEMPLATES: "" # e.g. MyCertificate:../path/to/my-template/src/Certificate.tsx
     depends_on:
       - uverify-backend
     ports:
