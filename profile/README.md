@@ -4,19 +4,33 @@
   <a href="https://github.com/UVerify-io/.github/actions/workflows/test.yml">
     <img src="https://github.com/UVerify-io/.github/actions/workflows/test.yml/badge.svg" alt="Hourly UVerify Liveness Test" />
   </a>
-   <a href="https://conventionalcommits.org">
+  <a href="https://conventionalcommits.org">
     <img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white" alt="Conventional Commits">
   </a>
-   <a href="https://discord.gg/Dvqkynn6xc">
+  <a href="https://discord.gg/Dvqkynn6xc">
     <img src="https://img.shields.io/discord/1263737876743589938" alt="Join our Discord">
   </a>
 </p>
 
-UVerify opens up blockchain technology to everyone, no matter your background. Effortlessly secure your file or text hashes on the Cardano blockchain. Want to kick the tires before diving into the code? Head over to [app.uverify.io](app.uverify.io) to check out the app.
+UVerify opens up blockchain technology to everyone, no matter your background. Effortlessly secure your file or text hashes on the Cardano blockchain. Want to kick the tires before diving into the code? Head over to [app.uverify.io](https://app.uverify.io) to check out the app.
+
+## 🗂️ Key Repositories
+
+| Repository | Description |
+|---|---|
+| [uverify-ui](https://github.com/UVerify-io/uverify-ui) | Main dApp — the React frontend at [app.uverify.io](https://app.uverify.io) |
+| [uverify-backend](https://github.com/UVerify-io/uverify-backend) | Java Spring Boot API at [api.uverify.io](https://api.uverify.io) |
+| [uverify-sdks](https://github.com/UVerify-io/uverify-sdks) | Official SDKs for TypeScript, Python, and Java |
+| [uverify-examples](https://github.com/UVerify-io/uverify-examples) | Runnable end-to-end examples for all supported languages |
+| [uverify-ui-template](https://github.com/UVerify-io/uverify-ui-template) | CLI + core types for building custom certificate UI templates |
+| [uverify-additional-templates](https://github.com/UVerify-io/uverify-additional-templates) | Community-contributed certificate UI templates |
+| [uverify-discovery](https://github.com/UVerify-io/uverify-discovery) | Landing page at [uverify.io](https://uverify.io) |
+
+📖 Full documentation at **[docs.uverify.io](https://docs.uverify.io)**
 
 ## ✨ Features
 
-With UVerify, you can easily store and retrieve data on the Cardano blockchain. The API is straightforward, and the UI is both intuitive and highly customizable. You can deploy your own instance or use the hosted version — whatever fits your needs best. Our main goal is flexibility: UVerify is designed to be a tool anyone can integrate seamlessly into their own projects. It’s more than just a tool; it’s a platform.
+With UVerify, you can easily store and retrieve data on the Cardano blockchain. The API is straightforward, and the UI is both intuitive and highly customizable. You can deploy your own instance or use the hosted version — whatever fits your needs best. Our main goal is flexibility: UVerify is designed to be a tool anyone can integrate seamlessly into their own projects. It's more than just a tool; it's a platform.
 
 ### How does it work?
 
@@ -24,147 +38,115 @@ UVerify includes its own scoped chain indexer, a Web3 API key management system,
 
 ## 🚀 Getting Started
 
-It's all about verification, so why not run your own UVerify instance? Just grab this [docker-compose file](../scripts/docker-compose.yml) and fire off this command:
+### Option A — Use the hosted app
+
+The fastest way to explore UVerify is [app.uverify.io](https://app.uverify.io). No setup required. If you want to experiment without spending real ADA, use the preprod deployment at [app.preprod.uverify.io](https://app.preprod.uverify.io).
+
+### Option B — Run your own instance
+
+Grab the [docker-compose file](../scripts/docker-compose.yml) and fire off:
 
 ```zsh
 docker compose up
 ```
 
-### 🍓 Low Hanging Fruits
+### Option C — Integrate via SDK
 
-UVerify lets you build use cases in a snap. For most things, it feels more like calling an API than wrestling with a full-blown blockchain solution. Here are a few examples of what you can do with UVerify:
+Install the SDK for your language and start issuing certificates in minutes:
 
-- **Notary Service:** Store file or text hashes on the Cardano blockchain.
-
-Install the required dependencies:
 ```bash
-npm install @meshsdk/core js-sha256 axios
+# TypeScript / JavaScript
+npm install @uverify/sdk
+
+# Python
+pip install uverify-sdk
+
+# Java (Maven / Gradle)
+# io.uverify:uverify-sdk
 ```
 
-**Node.js (server-side) example:**
-```js
-// UVerify plays nicely with any Cardano off-chain library.
-// This example uses meshjs.dev
+**Quick verify example (TypeScript):**
 
-import { MeshWallet, KoiosProvider } from '@meshsdk/core';
+```ts
+import { UVerifyClient } from '@uverify/sdk';
+
+const client = new UVerifyClient();
+
+// Check whether a hash has a certificate on-chain
+const certificates = await client.verify('your-sha256-hex-hash');
+console.log(certificates);
+```
+
+**Quick issue example (TypeScript):**
+
+```ts
+import { UVerifyClient } from '@uverify/sdk';
 import { sha256 } from 'js-sha256';
-import axios from 'axios';
 
-const BACKEND_URL = 'https://api.uverify.io'; // or 'http://localhost:9090' for local dev
-
-// Generate a new wallet and store your mnemonic somewhere safe!
-// If you lose it, you lose access to any funds held by this wallet.
-const mnemonic = MeshWallet.brew();
-console.log('Save your mnemonic:', mnemonic);
-
-const koiosProvider = new KoiosProvider('api');
-const wallet = new MeshWallet({
-    networkId: 1, // 0: testnet, 1: mainnet
-    fetcher: koiosProvider,
-    submitter: koiosProvider,
-    key: {
-        type: 'mnemonic',
-        words: mnemonic,
-    },
+const client = new UVerifyClient({
+  signTx: (unsignedTx) => wallet.signTx(unsignedTx, true),
+  signMessage: (msg) => wallet.signData(address, msg),
 });
 
-const userAddress = await wallet.getChangeAddress();
+const hash = sha256('Hello, UVerify!');
 
-// Hash the data you want to certify. This could be a string, file contents, etc.
-const myData = 'Hello, UVerify!'; // replace with your content
-const hash = sha256(myData);
+const txHash = await client.issueCertificates(address, [
+  {
+    hash,
+    algorithm: 'SHA-256',
+    metadata: { issuer: 'Acme Corp', description: 'Proof of existence' },
+  },
+]);
 
-// Optionally attach public metadata to the certificate
+console.log('Certificate anchored! TxHash:', txHash);
+```
+
+See the [SDK docs](https://docs.uverify.io/sdk) or the [uverify-examples](https://github.com/UVerify-io/uverify-examples) repository for complete runnable examples in TypeScript, Python, and Java, including diplomas, product passports, lab reports, and more.
+
+## 🍓 Low Hanging Fruits
+
+UVerify lets you build use cases in a snap. For most things, it feels more like calling an API than wrestling with a full-blown blockchain solution. Here are a few things you can do:
+
+| Use Case | Description |
+|---|---|
+| [**Notary Service**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/notary) | Store file or text hashes on the Cardano blockchain |
+| [**Diplomas & Credentials**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/diploma) | Batch-issue verifiable academic certificates |
+| [**Digital Product Passports**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/digital_product_passport) | EU DPP-compliant product traceability on-chain |
+| [**Lab Reports**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/laboratory_report) | GDPR-safe laboratory results with measured values |
+| [**Lost-pet necklaces**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/pet_necklace) | Privacy-preserving owner data for pet identification |
+| [**Document Integrity**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/document_integrity) | Tamper-evident anchoring of any document |
+| [**Tokenizable Certificates**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/tokenizable_certificate) | Certificates designed to be linked to on-chain tokens |
+| **...and much more** | Browse all examples in [uverify-examples](https://github.com/UVerify-io/uverify-examples) |
+
+### Custom UI Templates: Make it your own
+
+Pass `uverify_template_id` in your certificate's metadata to control how it renders in the UI:
+
+```js
 const metadata = {
-    issuer: 'Acme Corp',
-    description: 'Proof of existence for myData',
-    date: new Date().toISOString(),
+  uverify_template_id: 'diploma',
+  issuer: 'Acme University',
+  recipient: 'Jane Doe',
 };
-
-// Step 1: Build the unsigned transaction
-// Make sure your wallet has funds before submitting a transaction.
-// If you're on testnet, you can get free test ADA from the [Cardano Testnet Faucet](https://docs.cardano.org/cardano-testnets/tools/faucet/).
-// If you're on mainnet, you'll need real ADA in your wallet. Your request will fail if the wallet balance is too low to cover the transaction fee.
-
-const buildResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/build`, {
-    type: 'DEFAULT',
-    address: userAddress,
-    certificates: [
-        {
-            hash,
-            metadata,
-            algorithm: 'SHA-256',
-        },
-    ],
-});
-
-if (buildResponse.status !== 200 || buildResponse.data.status?.code !== 'SUCCESS') {
-    throw new Error('Failed to build transaction: ' + JSON.stringify(buildResponse.data));
-}
-
-// Step 2: Sign the transaction
-const unsignedTx = buildResponse.data.unsigned_transaction;
-const signedTx = await wallet.signTx(unsignedTx, true);
-
-// Step 3: Submit the signed transaction
-const submitResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/submit`, {
-    transaction: signedTx,
-});
-
-if (submitResponse.status === 200 && submitResponse.data.successful) {
-    console.log('Transaction submitted! TxHash:', submitResponse.data.value);
-} else {
-    throw new Error('Failed to submit transaction: ' + JSON.stringify(submitResponse.data));
-}
 ```
 
-**Browser (CIP-30 wallet) example:**
+There are two ways to work with templates:
 
-If you're building a frontend and want users to sign with their own wallet (e.g. Eternl, Yoroi), use the CIP-30 API instead:
-```js
-const api = await window.cardano[enabledWallet].enable();
-const userAddress = (await api.getUsedAddresses())[0];
+**Use or contribute a community template** — Browse the [uverify-additional-templates](https://github.com/UVerify-io/uverify-additional-templates) repository or add your own by implementing the [abstract template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Template.tsx). Contributions are welcome.
 
-// Build the transaction the same way as above...
-const buildResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/build`, {
-    type: 'DEFAULT',
-    address: userAddress,
-    certificates: [{ hash, metadata, algorithm: 'SHA-256' }],
-});
+**Build your own private template** — Use the [`uverify-ui-template`](https://github.com/UVerify-io/uverify-ui-template) CLI to scaffold a new template and keep your branding exclusive to your deployment:
 
-const unsignedTx = buildResponse.data.unsigned_transaction;
-
-// The user signs via their browser wallet — returns a witness set, not a full signed tx
-const witnessSet = await api.signTx(unsignedTx, true);
-
-const submitResponse = await axios.post(`${BACKEND_URL}/api/v1/transaction/submit`, {
-    transaction: unsignedTx,
-    witnessSet,
-});
-
-if (submitResponse.status === 200 && submitResponse.data.successful) {
-    console.log('Transaction submitted! TxHash:', submitResponse.data.value);
-}
+```zsh
+npx @uverify/cli init my-template
 ```
 
-### **Custom UI Templates:** Make it your own with a tailored look and feel.
+The [Diploma template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Diploma.tsx) is a clean starting point for single-purpose certificates. The [Social Hub template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/SocialHub/SocialHubTemplate.tsx) shows how to build richer, multi-component layouts.
 
-  Pass `uverify_template_id` in your certificate's metadata to control how it renders in the UI:
-```js
-  const metadata = {
-      uverify_template_id: 'diploma',
-      issuer: 'Acme University',
-      recipient: 'Jane Doe',
-  };
-```
+## 🔎 Dig Deeper
 
-  There are two ways to work with templates:
-
-  - **Use or contribute a community template**: Browse existing templates or add your own by implementing the [abstract template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Template.tsx). Contributions are welcome.
-  - **Keep a template private**: If you're building a product on top of UVerify, you can implement the same abstract template in your own fork or deployment, keeping your branding exclusive to your users.
-
-  To get a feel for what's possible, the [Diploma template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Diploma.tsx) is a clean starting point showing a simple single-purpose certificate layout. The [Social Hub template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/SocialHub/SocialHubTemplate.tsx) goes further, demonstrating how to build a richer, multi-component layout when your certificate needs to display more complex data.
-
-### 🔎 Dig Deeper
-
-You can find all the details about UVerify at [docs.uverify.io](https://docs.uverify.io). It's got everything you need to get going, including API documentation, guides, and more.
+| | |
+|---|---|
+| 📖 [docs.uverify.io](https://docs.uverify.io) | Full documentation, guides, and platform concepts |
+| 🔌 [API Reference](https://api.uverify.io/v1/api-docs) | Interactive Swagger docs |
+| 💬 [Discord](https://discord.gg/Dvqkynn6xc) | Get help and join the community |
+| 🗺️ [Roadmap](https://github.com/orgs/UVerify-io/projects/1) | See what's coming next |
