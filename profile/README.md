@@ -12,7 +12,7 @@
   </a>
 </p>
 
-UVerify opens up blockchain technology to everyone, no matter your background. Effortlessly secure your file or text hashes on the Cardano blockchain. Want to kick the tires before diving into the code? Head over to [app.uverify.io](https://app.uverify.io) to check out the app.
+UVerify opens up blockchain technology to everyone, no matter your background. Anchor file or text hashes on the Cardano blockchain, issue verifiable certificates, and build trust into any workflow — without deep blockchain expertise. Want to try it before diving into the code? Head over to [app.uverify.io](https://app.uverify.io).
 
 ## 🗂️ Key Repositories
 
@@ -22,6 +22,7 @@ UVerify opens up blockchain technology to everyone, no matter your background. E
 | [uverify-backend](https://github.com/UVerify-io/uverify-backend) | Java Spring Boot API at [api.uverify.io](https://api.uverify.io) |
 | [uverify-sdks](https://github.com/UVerify-io/uverify-sdks) | Official SDKs for TypeScript, Python, and Java |
 | [uverify-examples](https://github.com/UVerify-io/uverify-examples) | Runnable end-to-end examples for all supported languages |
+| [uverify-docs](https://github.com/UVerify-io/uverify-docs) | Documentation site at [docs.uverify.io](https://docs.uverify.io) |
 | [uverify-ui-template](https://github.com/UVerify-io/uverify-ui-template) | CLI + core types for building custom certificate UI templates |
 | [uverify-additional-templates](https://github.com/UVerify-io/uverify-additional-templates) | Community-contributed certificate UI templates |
 | [uverify-discovery](https://github.com/UVerify-io/uverify-discovery) | Landing page at [uverify.io](https://uverify.io) |
@@ -30,7 +31,7 @@ UVerify opens up blockchain technology to everyone, no matter your background. E
 
 ## ✨ Features
 
-With UVerify, you can easily store and retrieve data on the Cardano blockchain. The API is straightforward, and the UI is both intuitive and highly customizable. You can deploy your own instance or use the hosted version — whatever fits your needs best. Our main goal is flexibility: UVerify is designed to be a tool anyone can integrate seamlessly into their own projects. It's more than just a tool; it's a platform.
+With UVerify you can store and retrieve data on the Cardano blockchain through a clean API and a customizable UI. Deploy your own instance or use the hosted version — whatever fits your needs. UVerify is designed to integrate into existing projects without requiring blockchain expertise. It is an open platform, not just a tool.
 
 ### How does it work?
 
@@ -50,7 +51,19 @@ Grab the [docker-compose file](../scripts/docker-compose.yml) and fire off:
 docker compose up
 ```
 
-### Option C — Integrate via SDK
+### Option C — Run a local sandbox
+
+The [uverify-examples](https://github.com/UVerify-io/uverify-examples) repository ships a full local devnet — UVerify UI, backend, chain indexer, and a Cardano devnet node — all in Docker:
+
+```zsh
+git clone https://github.com/UVerify-io/uverify-examples
+cd uverify-examples
+uv run sandbox.py start
+```
+
+The sandbox faucet funds wallets instantly, so you can run every example without spending real ADA or touching a testnet.
+
+### Option D — Integrate via SDK
 
 Install the SDK for your language and start issuing certificates in minutes:
 
@@ -105,17 +118,20 @@ See the [SDK docs](https://docs.uverify.io/sdk) or the [uverify-examples](https:
 
 ## 🍓 Low Hanging Fruits
 
-UVerify lets you build use cases in a snap. For most things, it feels more like calling an API than wrestling with a full-blown blockchain solution. Here are a few things you can do:
+UVerify lets you build use cases in a snap. For most things, it feels more like calling an API than wrestling with a full-blown blockchain solution:
 
 | Use Case | Description |
 |---|---|
-| [**Notary Service**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/notary) | Store file or text hashes on the Cardano blockchain |
-| [**Diplomas & Credentials**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/diploma) | Batch-issue verifiable academic certificates |
-| [**Digital Product Passports**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/digital_product_passport) | EU DPP-compliant product traceability on-chain |
-| [**Lab Reports**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/laboratory_report) | GDPR-safe laboratory results with measured values |
-| [**Lost-pet necklaces**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/pet_necklace) | Privacy-preserving owner data for pet identification |
-| [**Document Integrity**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/document_integrity) | Tamper-evident anchoring of any document |
-| [**Tokenizable Certificates**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/src/examples/tokenizable_certificate) | Certificates designed to be linked to on-chain tokens |
+| [**Notary Service**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/notary) | Store file or text hashes on the Cardano blockchain |
+| [**Diplomas & Credentials**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/diploma) | Batch-issue verifiable academic certificates |
+| [**Digital Product Passports**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/digital_product_passport) | EU DPP-compliant product traceability on-chain |
+| [**Lab Reports**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/laboratory_report) | GDPR-safe laboratory results with measured values |
+| [**Certificates of Insurance**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/certificate_of_insurance) | Tamper-evident policy proof anchored on-chain |
+| [**Lost-pet necklaces**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/pet_necklace) | Privacy-preserving owner data for pet identification |
+| [**Document Integrity**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/document_integrity) | Tamper-evident anchoring of any document |
+| [**Tokenizable Certificates**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/tokenizable_certificate) | Certificates that can be redeemed as on-chain NFTs |
+| [**Agent Receipts**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/agent_receipt) | Immutable receipts for AI agent transactions with LCP-compliant terms |
+| [**Identity Credentials**](https://github.com/UVerify-io/uverify-examples/tree/main/typescript/identity_credential) | KERI-backed credentials with on-chain issuance and revocation |
 | **...and much more** | Browse all examples in [uverify-examples](https://github.com/UVerify-io/uverify-examples) |
 
 ### Custom UI Templates: Make it your own
@@ -130,7 +146,23 @@ const metadata = {
 };
 ```
 
-There are two ways to work with templates:
+UVerify ships several built-in templates you can use today:
+
+| Template ID | Use case |
+|---|---|
+| `diploma` | Academic certificates and credentials |
+| `digitalProductPassport` | EU DPP product traceability |
+| `laboratoryReport` | Lab results with measured values |
+| `certificateOfInsurance` | Policy proof documents |
+| `tokenizableCertificate` | Certificates redeemable as NFTs |
+| `agentReceipt` | AI agent transaction receipts with LCP-compliant terms |
+| `identityAuth` | KERI-backed identity credential issuance and revocation |
+| `petNecklace` | Pet owner identification via QR necklace |
+| `productVerification` | Product authenticity certificates |
+| `documentIntegrity` | General-purpose tamper-evident documents |
+| `monochrome` | Clean, minimal black-and-white layout |
+
+There are two ways to add more:
 
 **Use or contribute a community template** — Browse the [uverify-additional-templates](https://github.com/UVerify-io/uverify-additional-templates) repository or add your own by implementing the [abstract template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Template.tsx). Contributions are welcome.
 
@@ -140,7 +172,7 @@ There are two ways to work with templates:
 npx @uverify/cli init my-template
 ```
 
-The [Diploma template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Diploma.tsx) is a clean starting point for single-purpose certificates. The [Social Hub template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/SocialHub/SocialHubTemplate.tsx) shows how to build richer, multi-component layouts.
+The [Diploma template](https://github.com/UVerify-io/uverify-ui/blob/main/src/templates/Diploma.tsx) is a clean starting point for single-purpose certificates.
 
 ## 🔎 Dig Deeper
 
